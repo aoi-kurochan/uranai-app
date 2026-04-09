@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数秘術鑑定 - あなたの運命の数字</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --primary: #7B6BA8; --primary-light: #A594D0; --primary-dark: #5A4B82;
+  --accent-gold: #C9A96E; --accent-gold-light: #E8D5A8;
+  --bg-deep: #1a1432; --bg-mid: #2d2456;
+  --text-light: #F0EBF5; --text-muted: #B8A8D0;
+  --glass-bg: rgba(255,255,255,0.06); --glass-border: rgba(255,255,255,0.12);
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Noto Sans JP', sans-serif; background: var(--bg-deep);
+  color: var(--text-light); min-height: 100vh; overflow-x: hidden;
+  line-height: 1.9; -webkit-font-smoothing: antialiased;
+}
+.bg-canvas {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
+  background: radial-gradient(ellipse at 20% 20%, rgba(123,107,168,0.25) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(90,75,130,0.2) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(45,36,86,0.8) 0%, transparent 70%),
+    linear-gradient(180deg, #1a1432 0%, #231c48 50%, #1a1432 100%);
+}
+.stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+.star {
+  position: absolute; width: 3px; height: 3px; background: #fff; border-radius: 50%;
+  animation: twinkle var(--dur) ease-in-out infinite; opacity: 0;
+}
+@keyframes twinkle { 0%,100%{opacity:0;transform:scale(.5)} 50%{opacity:var(--brightness);transform:scale(1)} }
+.container { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; padding: 20px; min-height: 100vh; }
+.screen { display: none; animation: fadeSlideIn 0.6s ease-out; }
+.screen.active { display: block; }
+@keyframes fadeSlideIn { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+
+/* Welcome */
+.welcome-header { text-align: center; padding: 60px 0 40px; }
+.welcome-icon { font-size: 48px; margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+.welcome-title {
+  font-family: 'Noto Serif JP', serif; font-size: 28px; font-weight: 600; letter-spacing: 3px;
+  background: linear-gradient(135deg, var(--accent-gold-light), var(--accent-gold), var(--accent-gold-light));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 12px;
+}
+.welcome-subtitle { font-size: 14px; color: var(--text-muted); letter-spacing: 2px; font-weight: 300; }
+.welcome-desc {
+  text-align: center; margin: 30px 0; padding: 30px 20px;
+  background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; backdrop-filter: blur(10px);
+}
+.welcome-desc p { font-size: 14px; color: var(--text-muted); line-height: 2.2; font-weight: 300; }
+.welcome-features { display: flex; flex-direction: column; gap: 12px; margin: 30px 0; }
+.feature-item {
+  display: flex; align-items: center; gap: 14px; padding: 16px 20px;
+  background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px;
+}
+.feature-icon { font-size: 22px; flex-shrink: 0; }
+.feature-text { font-size: 13px; color: var(--text-muted); font-weight: 300; }
+
+/* Buttons */
+.btn-primary {
+  display: block; width: 100%; padding: 18px; margin-top: 30px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff; border: none; border-radius: 14px; font-size: 16px; font-weight: 500;
+  font-family: 'Noto Sans JP', sans-serif; letter-spacing: 2px; cursor: pointer;
+  transition: all 0.3s; position: relative; overflow: hidden;
+}
+.btn-primary::before {
+  content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent); transition: left 0.5s;
+}
+.btn-primary:hover::before { left: 100%; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(123,107,168,0.4); }
+.btn-primary:active { transform: translateY(0); }
+.btn-back {
+  display: inline-flex; align-items: center; gap: 6px; padding: 10px 0;
+  background: none; border: none; color: var(--text-muted); font-size: 13px;
+  font-family: 'Noto Sans JP', sans-serif; cursor: pointer; transition: color 0.3s; margin-bottom: 10px;
+}
+.btn-back:hover { color: var(--text-light); }
+
+/* Birthday */
+.input-section { padding: 40px 0 20px; }
+.section-label { font-family: 'Noto Serif JP', serif; font-size: 20px; font-weight: 500; text-align: center; margin-bottom: 8px; color: var(--accent-gold-light); }
+.section-sublabel { text-align: center; font-size: 13px; color: var(--text-muted); margin-bottom: 30px; font-weight: 300; }
+.date-input-group { display: flex; gap: 10px; align-items: flex-end; }
+.date-field { flex: 1; }
+.date-field label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; letter-spacing: 1px; }
+.date-field select {
+  width: 100%; padding: 14px 12px; background: var(--glass-bg); border: 1px solid var(--glass-border);
+  border-radius: 10px; color: var(--text-light); font-size: 16px; font-family: 'Noto Sans JP', sans-serif;
+  appearance: none; -webkit-appearance: none; outline: none; transition: border-color 0.3s; text-align: center; cursor: pointer;
+}
+.date-field select:focus { border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(123,107,168,0.2); }
+.date-field select option { background: var(--bg-mid); color: var(--text-light); }
+.error-msg { text-align: center; color: #e88; font-size: 13px; margin-top: 12px; display: none; }
+
+/* Questions */
+.question-progress { display: flex; gap: 6px; margin-bottom: 30px; padding-top: 10px; }
+.progress-dot { flex: 1; height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px; transition: background 0.4s; }
+.progress-dot.filled { background: var(--accent-gold); }
+.progress-dot.current { background: var(--primary-light); }
+.question-number { font-size: 12px; color: var(--accent-gold); letter-spacing: 2px; margin-bottom: 10px; }
+.question-text { font-family: 'Noto Serif JP', serif; font-size: 20px; font-weight: 500; line-height: 1.7; margin-bottom: 30px; }
+.question-hint { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; font-weight: 300; }
+.options-list { display: flex; flex-direction: column; gap: 10px; }
+.option-btn {
+  display: flex; align-items: center; gap: 14px; padding: 18px 20px;
+  background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 14px;
+  color: var(--text-light); font-size: 14px; font-family: 'Noto Sans JP', sans-serif;
+  cursor: pointer; transition: all 0.3s; text-align: left; line-height: 1.6;
+}
+.option-btn:hover { background: rgba(123,107,168,0.15); border-color: var(--primary-light); transform: translateX(4px); }
+.option-icon { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.option-label { font-weight: 400; }
+.option-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; font-weight: 300; }
+
+/* Loading */
+.loading-container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; text-align: center; }
+.loading-orb {
+  width: 100px; height: 100px; border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, var(--primary-light), var(--primary-dark));
+  box-shadow: 0 0 40px rgba(123,107,168,0.4), 0 0 80px rgba(123,107,168,0.2);
+  animation: orbPulse 2s ease-in-out infinite; margin-bottom: 40px;
+}
+@keyframes orbPulse { 0%,100%{transform:scale(1);box-shadow:0 0 40px rgba(123,107,168,0.4)} 50%{transform:scale(1.1);box-shadow:0 0 60px rgba(123,107,168,0.6),0 0 100px rgba(123,107,168,0.3)} }
+.loading-text { font-family: 'Noto Serif JP', serif; font-size: 16px; color: var(--text-muted); letter-spacing: 3px; animation: loadFade 2s ease-in-out infinite; }
+@keyframes loadFade { 0%,100%{opacity:.5} 50%{opacity:1} }
+.loading-steps { margin-top: 30px; display: flex; flex-direction: column; gap: 8px; }
+.loading-step { font-size: 13px; color: var(--text-muted); opacity: 0; transform: translateY(10px); transition: all 0.5s; }
+.loading-step.show { opacity: 1; transform: translateY(0); }
+
+/* Result */
+.result-container { padding: 20px 0 60px; }
+.result-cover {
+  text-align: center; padding: 60px 20px; margin-bottom: 40px;
+  background: radial-gradient(ellipse at 30% 20%, rgba(165,148,208,0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(201,169,110,0.1) 0%, transparent 50%), var(--glass-bg);
+  border: 1px solid var(--glass-border); border-radius: 20px; position: relative; overflow: hidden;
+}
+.result-cover::before {
+  content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: conic-gradient(from 0deg, transparent, rgba(201,169,110,0.05), transparent, rgba(165,148,208,0.05), transparent);
+  animation: coverRotate 20s linear infinite;
+}
+@keyframes coverRotate { to{transform:rotate(360deg)} }
+.result-cover-inner { position: relative; z-index: 1; }
+.result-cover-icon { font-size: 40px; margin-bottom: 16px; }
+.result-cover-title {
+  font-family: 'Noto Serif JP', serif; font-size: 26px; font-weight: 600; letter-spacing: 5px;
+  background: linear-gradient(135deg, var(--accent-gold-light), var(--accent-gold));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 20px;
+}
+.result-cover-date { font-size: 14px; color: var(--text-muted); letter-spacing: 2px; }
+.result-cover-birthday { font-family: 'Noto Serif JP', serif; font-size: 18px; color: var(--text-light); margin-top: 8px; letter-spacing: 3px; }
+.number-cards { display: flex; gap: 10px; margin-bottom: 40px; }
+.number-card {
+  flex: 1; text-align: center; padding: 20px 10px;
+  background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; transition: transform 0.3s;
+}
+.number-card:hover { transform: translateY(-4px); }
+.number-card-label { font-size: 10px; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 8px; }
+.number-card-value {
+  font-family: 'Noto Serif JP', serif; font-size: 36px; font-weight: 700;
+  background: linear-gradient(135deg, var(--accent-gold-light), var(--accent-gold));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1.2;
+}
+.number-card-name { font-size: 11px; color: var(--primary-light); margin-top: 6px; font-weight: 500; }
+.result-section {
+  margin-bottom: 36px; padding: 30px 24px;
+  background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 18px; position: relative;
+}
+.result-section::before {
+  content: ''; position: absolute; top: 0; left: 24px; right: 24px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-gold), transparent); opacity: 0.3;
+}
+.section-number { font-size: 11px; color: var(--accent-gold); letter-spacing: 3px; margin-bottom: 6px; }
+.section-title { font-family: 'Noto Serif JP', serif; font-size: 18px; font-weight: 600; margin-bottom: 20px; line-height: 1.5; color: var(--accent-gold-light); }
+.section-body { font-size: 14px; line-height: 2.2; color: var(--text-muted); font-weight: 300; }
+.section-body p { margin-bottom: 16px; }
+.section-body p:last-child { margin-bottom: 0; }
+.highlight-box { padding: 20px; margin: 16px 0; background: rgba(201,169,110,0.06); border-left: 3px solid var(--accent-gold); border-radius: 0 10px 10px 0; font-size: 14px; line-height: 2; }
+.result-ending {
+  text-align: center; padding: 40px 20px; margin-top: 20px;
+  background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 18px;
+}
+.result-ending-title { font-family: 'Noto Serif JP', serif; font-size: 18px; font-weight: 500; color: var(--accent-gold-light); margin-bottom: 20px; }
+.result-ending-text { font-size: 14px; line-height: 2.2; color: var(--text-muted); font-weight: 300; text-align: left; }
+.result-ending-icon { font-size: 28px; margin-top: 20px; }
+.result-footer { text-align: center; margin-top: 40px; padding: 20px; }
+.result-footer p { font-size: 11px; color: rgba(255,255,255,0.25); letter-spacing: 1px; }
+.btn-retry {
+  display: block; width: 100%; padding: 16px; margin-top: 30px; background: transparent;
+  color: var(--text-muted); border: 1px solid var(--glass-border); border-radius: 14px;
+  font-size: 14px; font-family: 'Noto Sans JP', sans-serif; letter-spacing: 2px; cursor: pointer; transition: all 0.3s;
+}
+.btn-retry:hover { border-color: var(--primary-light); color: var(--text-light); }
+.disclaimer { margin-top: 16px; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 10px; font-size: 11px; color: rgba(255,255,255,0.3); line-height: 1.8; text-align: center; }
+@media (max-width: 480px) {
+  .container { padding: 16px; } .welcome-title { font-size: 24px; }
+  .number-cards { gap: 6px; } .number-card { padding: 14px 6px; } .number-card-value { font-size: 28px; }
+  .result-section { padding: 24px 18px; } .result-cover { padding: 40px 16px; }
+}
+</style>
+</head>
+<body>
+<div class="bg-canvas"></div>
+<div class="stars" id="stars"></div>
+<div class="container">
+  <div class="screen active" id="screen-welcome">
+    <div class="welcome-header">
+      <div class="welcome-icon">&#10024;</div>
+      <h1 class="welcome-title">数秘術鑑定</h1>
+      <p class="welcome-subtitle">NUMEROLOGY READING</p>
+    </div>
+    <div class="welcome-desc">
+      <p>生年月日に刻まれた<br>あなただけの「運命の数字」を読み解き<br>人生をより豊かにするための<br>メッセージをお届けします。</p>
+    </div>
+    <div class="welcome-features">
+      <div class="feature-item"><span class="feature-icon">&#9733;</span><span class="feature-text">ライフパスナンバー ─ あなたの本質と人生の目的</span></div>
+      <div class="feature-item"><span class="feature-icon">&#127873;</span><span class="feature-text">バースデーナンバー ─ 生まれ持った才能と強み</span></div>
+      <div class="feature-item"><span class="feature-icon">&#128302;</span><span class="feature-text">パーソナルイヤー ─ 2026年のあなたの運勢</span></div>
+    </div>
+    <button class="btn-primary" onclick="goTo('screen-birthday')">鑑定をはじめる</button>
+  </div>
+
+  <div class="screen" id="screen-birthday">
+    <button class="btn-back" onclick="goTo('screen-welcome')">&#8592; 戻る</button>
+    <div class="input-section">
+      <p class="section-label">生年月日を入力してください</p>
+      <p class="section-sublabel">あなたの運命の数字を計算します</p>
+      <div class="date-input-group">
+        <div class="date-field"><label>年</label><select id="input-year"></select></div>
+        <div class="date-field"><label>月</label><select id="input-month"></select></div>
+        <div class="date-field"><label>日</label><select id="input-day"></select></div>
+      </div>
+      <p class="error-msg" id="date-error">有効な日付を入力してください</p>
+      <button class="btn-primary" onclick="validateAndNext()">次へ進む</button>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-questions">
+    <button class="btn-back" onclick="prevQuestion()">&#8592; 戻る</button>
+    <div class="question-progress" id="q-progress"></div>
+    <p class="question-number" id="q-number"></p>
+    <h2 class="question-text" id="q-text"></h2>
+    <p class="question-hint" id="q-hint"></p>
+    <div class="options-list" id="q-options"></div>
+  </div>
+
+  <div class="screen" id="screen-loading">
+    <div class="loading-container">
+      <div class="loading-orb"></div>
+      <p class="loading-text">鑑定中...</p>
+      <div class="loading-steps">
+        <p class="loading-step" id="ls1">&#9733; 運命の数字を計算しています</p>
+        <p class="loading-step" id="ls2">&#128302; あなたの星の配置を読み解いています</p>
+        <p class="loading-step" id="ls3">&#128220; 鑑定書を作成しています</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-result">
+    <div class="result-container" id="result-container"></div>
+  </div>
+</div>
+
+<script>
+// Stars
+(function(){const c=document.getElementById('stars');for(let i=0;i<80;i++){const s=document.createElement('div');s.className='star';s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';s.style.setProperty('--dur',(3+Math.random()*4)+'s');s.style.setProperty('--brightness',(0.3+Math.random()*0.7));s.style.animationDelay=Math.random()*5+'s';s.style.width=s.style.height=(1+Math.random()*2.5)+'px';c.appendChild(s)}})();
+
+// Date selects
+(function(){const y=document.getElementById('input-year'),m=document.getElementById('input-month'),d=document.getElementById('input-day');const now=new Date();y.innerHTML='<option value="">--</option>';for(let i=now.getFullYear();i>=1930;i--)y.innerHTML+=`<option value="${i}">${i}</option>`;m.innerHTML='<option value="">--</option>';for(let i=1;i<=12;i++)m.innerHTML+=`<option value="${i}">${i}</option>`;d.innerHTML='<option value="">--</option>';for(let i=1;i<=31;i++)d.innerHTML+=`<option value="${i}">${i}</option>`})();
+
+// State
+let birthday={year:0,month:0,day:0}, answers=[], currentQ=0, selectedCategory='';
+
+// ============================
+// BRANCHING QUESTIONS
+// ============================
+const Q1 = {
+  text: '今、人生で最も\n気になっていることは？',
+  hint: '直感で選んでください。数字があなたの悩みに寄り添います。',
+  options: [
+    { icon: '&#10084;&#65039;', label: '恋愛・パートナーシップ', desc: '出会い、片思い、パートナーとの関係', value: 'love' },
+    { icon: '&#128188;', label: '仕事・キャリア', desc: '適職、転職、やりがい、将来の方向性', value: 'career' },
+    { icon: '&#128176;', label: 'お金・財運', desc: '収入、貯蓄、お金との付き合い方', value: 'money' },
+    { icon: '&#128106;', label: '人間関係・家族', desc: '職場、友人、家族、夫婦関係', value: 'relationship' },
+    { icon: '&#127807;', label: '心と体のバランス', desc: '日々の充実感、エネルギー、生活リズム', value: 'wellness' },
+  ]
+};
+
+const branchQuestions = {
+  love: [
+    { text: '恋愛について、\n今一番気になることは？', hint: 'あなたの恋愛の悩みを数字の力で読み解きます。',
+      options: [
+        { icon: '&#128148;', label: '出会いがない', desc: '良い人に巡り合えない、出会いの場がない', value: 'no_encounter' },
+        { icon: '&#128140;', label: '片思い・気持ちを伝えられない', desc: '好きな人がいるけれど一歩が踏み出せない', value: 'unrequited' },
+        { icon: '&#128524;', label: 'パートナーとの関係に悩んでいる', desc: 'すれ違い、マンネリ、価値観の違い', value: 'partner_issue' },
+        { icon: '&#128141;', label: '結婚・将来について考えている', desc: '結婚のタイミング、将来のパートナー像', value: 'marriage' },
+      ]},
+    { text: '恋愛で、自分の\nこんなところが気になる', hint: 'あなたの恋愛パターンを数字が教えてくれます。',
+      options: [
+        { icon: '&#128150;', label: '好きになると尽くしすぎる', desc: '相手のために自分を後回しにしがち', value: 'too_devoted' },
+        { icon: '&#128566;', label: '本音を言えず我慢してしまう', desc: '嫌われたくなくて気持ちを隠しがち', value: 'suppress' },
+        { icon: '&#128081;', label: '理想が高く妥協できない', desc: '相手に求める条件が多くなってしまう', value: 'idealistic' },
+        { icon: '&#128560;', label: '傷つくのが怖くて踏み出せない', desc: '過去の経験から恋愛に臆病になっている', value: 'fear_hurt' },
+      ]},
+    { text: '理想のパートナーシップに\n近いのは？', hint: 'あなたの恋愛の理想を教えてください。',
+      options: [
+        { icon: '&#9749;', label: '一緒にいて自然体でいられる関係', desc: '無理せず、ありのままでいられる', value: 'natural' },
+        { icon: '&#128640;', label: '刺激し合って成長できる関係', desc: 'お互いを高め合えるパートナーシップ', value: 'grow_together' },
+        { icon: '&#128274;', label: '深い信頼で結ばれた安心できる関係', desc: '揺るがない絆と安心感', value: 'deep_trust' },
+        { icon: '&#128330;', label: 'お互いの自由を尊重し合える関係', desc: '束縛せず、自立した二人の関係', value: 'mutual_freedom' },
+      ]},
+    { text: '恋愛において、今\n一番欲しいものは？', hint: '最後の質問です。心の声に従ってください。',
+      options: [
+        { icon: '&#127775;', label: '運命的な出会い', desc: '人生を変えるような素敵な出会い', value: 'destiny_meet' },
+        { icon: '&#128172;', label: '素直になる勇気', desc: '自分の気持ちを正直に伝える力', value: 'honesty_courage' },
+        { icon: '&#128293;', label: '関係を深めるヒント', desc: '今の関係をもっと良くする方法', value: 'deepen_hint' },
+        { icon: '&#127800;', label: '自分を好きになる力', desc: 'まず自分自身を受け入れ、愛する力', value: 'self_love' },
+      ]},
+  ],
+  career: [
+    { text: '仕事について、\n今一番気になることは？', hint: 'あなたのキャリアの悩みを数字が照らします。',
+      options: [
+        { icon: '&#129300;', label: '今の仕事が自分に合っているかわからない', desc: '適職なのか、このままでいいのか迷っている', value: 'fit' },
+        { icon: '&#128640;', label: '転職・独立を考えている', desc: '新しい環境やチャレンジを検討中', value: 'change_job' },
+        { icon: '&#128164;', label: 'やりがいやモチベーションが見つからない', desc: '仕事に情熱を感じられない', value: 'motivation' },
+        { icon: '&#128548;', label: '職場の環境や人間関係がつらい', desc: '上司、同僚との関係に疲れている', value: 'work_env' },
+      ]},
+    { text: '仕事で、自分の\nこんなところが気になる', hint: 'あなたの仕事スタイルを数字が教えてくれます。',
+      options: [
+        { icon: '&#128175;', label: '完璧を求めすぎて疲れる', desc: '妥協できず、自分を追い込みがち', value: 'perfectionist' },
+        { icon: '&#128543;', label: '自分の実力に自信が持てない', desc: '周りと比べて落ち込むことがある', value: 'low_confidence' },
+        { icon: '&#128566;', label: 'やりたいことが見つからない', desc: '何が向いているのかわからない', value: 'no_passion' },
+        { icon: '&#128170;', label: '人に頼るのが苦手', desc: '全部自分で抱え込んでしまう', value: 'cant_delegate' },
+      ]},
+    { text: '理想の働き方に\n近いのは？', hint: 'あなたの理想のキャリア像を教えてください。',
+      options: [
+        { icon: '&#127775;', label: '好きなことを仕事にしたい', desc: '情熱を注げる仕事で生きていく', value: 'passion_work' },
+        { icon: '&#9878;', label: '安定した収入と充実感の両立', desc: '経済的安心とやりがいの両方を', value: 'balance_work' },
+        { icon: '&#128101;', label: 'チームで大きなことを成し遂げたい', desc: '仲間と力を合わせて成果を出す', value: 'team_work' },
+        { icon: '&#127965;', label: '自由な時間と場所で働きたい', desc: '自分のペースで柔軟に働く', value: 'free_work' },
+      ]},
+    { text: 'キャリアにおいて、今\n一番欲しいものは？', hint: '最後の質問です。心の声に従ってください。',
+      options: [
+        { icon: '&#129517;', label: '進むべき方向性', desc: '自分のキャリアの道筋を知りたい', value: 'career_direction' },
+        { icon: '&#128293;', label: '一歩踏み出す勇気', desc: '変化を恐れず行動する力が欲しい', value: 'career_courage' },
+        { icon: '&#128170;', label: '自分の強みへの自信', desc: '自分の価値を信じる力が欲しい', value: 'career_strength' },
+        { icon: '&#127808;', label: '良い出会いやチャンス', desc: '人生を変えるきっかけが欲しい', value: 'career_chance' },
+      ]},
+  ],
+  money: [
+    { text: 'お金について、\n今一番気になることは？', hint: 'あなたと豊かさの関係を数字が読み解きます。',
+      options: [
+        { icon: '&#128200;', label: '収入を増やしたい', desc: '今の収入に満足できていない', value: 'increase_income' },
+        { icon: '&#128552;', label: '将来のお金の不安がある', desc: '老後や万が一の時が心配', value: 'future_anxiety' },
+        { icon: '&#128178;', label: '貯蓄や資産形成の仕方がわからない', desc: '何から始めればいいか迷っている', value: 'saving_lost' },
+        { icon: '&#128532;', label: 'お金を使うことに罪悪感がある', desc: '自分のためにお金を使うのが苦手', value: 'guilt_spending' },
+      ]},
+    { text: 'お金に対して、自分の\nこんなところが気になる', hint: 'あなたのお金との付き合い方を見つめます。',
+      options: [
+        { icon: '&#128184;', label: 'つい衝動的に使ってしまう', desc: '気づくとお金がなくなっている', value: 'impulsive' },
+        { icon: '&#129303;', label: '断れなくてお金を使ってしまう', desc: '人付き合いでの出費が多い', value: 'cant_refuse' },
+        { icon: '&#128584;', label: 'お金の話をするのが苦手', desc: '給与交渉や価格交渉を避けがち', value: 'avoid_money_talk' },
+        { icon: '&#128560;', label: '心配しすぎて楽しめない', desc: '将来が不安で今を楽しめない', value: 'over_worry' },
+      ]},
+    { text: '理想のお金との\n関係に近いのは？', hint: 'あなたの豊かさの理想を教えてください。',
+      options: [
+        { icon: '&#127881;', label: '好きなことに自由に使える余裕', desc: 'やりたいことにお金を気にせず使える', value: 'money_freedom' },
+        { icon: '&#128274;', label: '将来の安心を手に入れたい', desc: '老後や家族の未来に備えたい', value: 'money_security' },
+        { icon: '&#127873;', label: '大切な人のために使いたい', desc: '家族や友人に恩返しがしたい', value: 'money_giving' },
+        { icon: '&#128524;', label: 'お金に振り回されない心の余裕', desc: '金額に一喜一憂しない自分になりたい', value: 'money_peace' },
+      ]},
+    { text: 'お金について、今\n一番欲しいものは？', hint: '最後の質問です。心の声に従ってください。',
+      options: [
+        { icon: '&#128200;', label: '収入アップのヒント', desc: '自分に合った稼ぎ方を知りたい', value: 'income_hint' },
+        { icon: '&#128221;', label: '賢いお金の管理法', desc: '無理なく続けられる方法を知りたい', value: 'management' },
+        { icon: '&#128275;', label: 'お金のブロックを外す力', desc: 'お金に対するネガティブな思い込みを手放したい', value: 'unblock' },
+        { icon: '&#10024;', label: '豊かさを感じるマインド', desc: '今あるものに感謝し豊かさを引き寄せたい', value: 'abundance' },
+      ]},
+  ],
+  relationship: [
+    { text: '人間関係について、\n今一番気になることは？', hint: 'あなたと人との関わりを数字が照らします。',
+      options: [
+        { icon: '&#127970;', label: '職場の人間関係がうまくいかない', desc: '上司・同僚・部下との関係に悩んでいる', value: 'work_rel' },
+        { icon: '&#127968;', label: '家族・パートナーとの関係に悩んでいる', desc: '身近な人との距離感や理解し合えなさ', value: 'family_rel' },
+        { icon: '&#128101;', label: '友人関係が希薄になってきた', desc: '気づけば深い付き合いの友人が少ない', value: 'friend_rel' },
+        { icon: '&#128566;', label: '人付き合い全般が苦手', desc: '人と関わること自体に疲れを感じる', value: 'general_rel' },
+      ]},
+    { text: '人間関係で、自分の\nこんなところが気になる', hint: 'あなたの人付き合いのパターンを見つめます。',
+      options: [
+        { icon: '&#128064;', label: '人の顔色を気にしすぎる', desc: '相手の反応が気になって疲れる', value: 'people_watching' },
+        { icon: '&#128567;', label: '言いたいことが言えない', desc: '自分の意見を飲み込んでしまう', value: 'cant_speak' },
+        { icon: '&#128274;', label: '人を信用するのに時間がかかる', desc: '心を開くまでに壁を作ってしまう', value: 'slow_trust' },
+        { icon: '&#128591;', label: '距離感がわからない', desc: '近づきすぎたり離れすぎたりしてしまう', value: 'distance' },
+      ]},
+    { text: '理想の人間関係に\n近いのは？', hint: 'あなたにとっての心地よい関係を教えてください。',
+      options: [
+        { icon: '&#128172;', label: '本音で語り合える関係', desc: '建前なしで気持ちを伝え合える', value: 'honest_rel' },
+        { icon: '&#129309;', label: 'お互いを尊重し合える関係', desc: '違いを認め、敬い合える', value: 'respect_rel' },
+        { icon: '&#127969;', label: '一緒にいて安心できる関係', desc: '素の自分でいられる居場所', value: 'safe_rel' },
+        { icon: '&#9889;', label: '刺激を与え合える関係', desc: 'お互いが成長できるつながり', value: 'inspiring_rel' },
+      ]},
+    { text: '人間関係において、今\n一番欲しいものは？', hint: '最後の質問です。心の声に従ってください。',
+      options: [
+        { icon: '&#128293;', label: '心を開く勇気', desc: '自分から関わっていく力が欲しい', value: 'rel_openness' },
+        { icon: '&#9971;', label: '境界線を引く力', desc: '自分を守りながら人と関わりたい', value: 'rel_boundary' },
+        { icon: '&#128101;', label: '信頼できる仲間', desc: '本当に心を許せる人が欲しい', value: 'rel_trust' },
+        { icon: '&#127800;', label: 'ありのままの自分でいる安心感', desc: '無理をしなくていい関係が欲しい', value: 'rel_authenticity' },
+      ]},
+  ],
+  wellness: [
+    { text: '心と体のバランスで、\n今一番気になることは？', hint: 'あなたの日々の充実感を数字が読み解きます。',
+      options: [
+        { icon: '&#128167;', label: '毎日に充実感がない', desc: 'なんとなく日々が過ぎていく感覚がある', value: 'no_fulfillment' },
+        { icon: '&#128164;', label: 'エネルギーが足りない', desc: '疲れやすい、やる気が出ない', value: 'low_energy' },
+        { icon: '&#128552;', label: '不安やモヤモヤを感じやすい', desc: '漠然とした不安が消えない', value: 'anxiety' },
+        { icon: '&#128260;', label: '生活リズムが乱れている', desc: '睡眠や食事のリズムが不規則', value: 'bad_rhythm' },
+      ]},
+    { text: '日々の暮らしの中で、自分の\nこんなところが気になる', hint: 'あなたの生活パターンを見つめます。',
+      options: [
+        { icon: '&#9203;', label: '自分の時間が取れない', desc: '仕事や家事に追われて余裕がない', value: 'no_time' },
+        { icon: '&#128163;', label: 'やるべきことに追われている', desc: 'ToDoリストに押しつぶされそう', value: 'overwhelmed' },
+        { icon: '&#128546;', label: '楽しみや喜びを感じにくい', desc: '以前のようにワクワクできない', value: 'joyless' },
+        { icon: '&#128566;', label: '一人の時間が多すぎる', desc: '孤独を感じることがある', value: 'lonely' },
+      ]},
+    { text: '理想の暮らしに\n近いのは？', hint: 'あなたの理想の日々を教えてください。',
+      options: [
+        { icon: '&#9889;', label: 'メリハリのある充実した毎日', desc: 'やりがいと休息のバランスが取れた日々', value: 'active_life' },
+        { icon: '&#127796;', label: 'ゆったりと心穏やかに過ごす毎日', desc: '焦らず、自分のペースで暮らす', value: 'calm_life' },
+        { icon: '&#127912;', label: '好きなことに囲まれた毎日', desc: '趣味や好きなものに時間を使える', value: 'joyful_life' },
+        { icon: '&#128149;', label: '大切な人と笑い合える毎日', desc: '温かいつながりの中で暮らす', value: 'connected_life' },
+      ]},
+    { text: '心と体のために、今\n一番欲しいものは？', hint: '最後の質問です。心の声に従ってください。',
+      options: [
+        { icon: '&#128293;', label: 'エネルギーを取り戻す方法', desc: '元気と活力を取り戻したい', value: 'recharge' },
+        { icon: '&#127800;', label: '心の余裕とゆとり', desc: '焦りやプレッシャーから解放されたい', value: 'margin' },
+        { icon: '&#127775;', label: '毎日を楽しむ力', desc: '日常の中に喜びを見つけたい', value: 'enjoyment' },
+        { icon: '&#129303;', label: '自分を大切にする習慣', desc: 'セルフケアを習慣にしたい', value: 'self_care' },
+      ]},
+  ]
+};
+
+// ============================
+// NAV
+// ============================
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function validateAndNext() {
+  const y=parseInt(document.getElementById('input-year').value);
+  const m=parseInt(document.getElementById('input-month').value);
+  const d=parseInt(document.getElementById('input-day').value);
+  const err=document.getElementById('date-error');
+  if(!y||!m||!d){err.style.display='block';return}
+  const date=new Date(y,m-1,d);
+  if(date.getFullYear()!==y||date.getMonth()!==m-1||date.getDate()!==d){err.style.display='block';return}
+  err.style.display='none';
+  birthday={year:y,month:m,day:d};
+  currentQ=0; answers=[]; selectedCategory='';
+  renderQuestion();
+  goTo('screen-questions');
+}
+
+function getActiveQuestions() {
+  if (currentQ === 0) return [Q1];
+  return [Q1, ...branchQuestions[selectedCategory]];
+}
+
+function renderQuestion() {
+  const qs = getActiveQuestions();
+  const q = qs[currentQ];
+  const totalQ = 5;
+  const prog = document.getElementById('q-progress');
+  prog.innerHTML = '';
+  for (let i = 0; i < totalQ; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'progress-dot' + (i < currentQ ? ' filled' : '') + (i === currentQ ? ' current' : '');
+    prog.appendChild(dot);
+  }
+  document.getElementById('q-number').textContent = `QUESTION ${currentQ + 1} / ${totalQ}`;
+  document.getElementById('q-text').innerHTML = q.text.replace(/\n/g, '<br>');
+  document.getElementById('q-hint').textContent = q.hint;
+  const opts = document.getElementById('q-options');
+  opts.innerHTML = '';
+  q.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="option-icon">${opt.icon}</span><div><div class="option-label">${opt.label}</div><div class="option-desc">${opt.desc}</div></div>`;
+    btn.onclick = () => selectOption(opt.value);
+    opts.appendChild(btn);
+  });
+}
+
+function selectOption(value) {
+  answers[currentQ] = value;
+  if (currentQ === 0) selectedCategory = value;
+  if (currentQ < 4) {
+    currentQ++;
+    renderQuestion();
+    const sc = document.getElementById('screen-questions');
+    sc.style.animation = 'none'; sc.offsetHeight; sc.style.animation = 'fadeSlideIn 0.4s ease-out';
+  } else {
+    startLoading();
+  }
+}
+
+function prevQuestion() {
+  if (currentQ > 0) { currentQ--; renderQuestion(); }
+  else goTo('screen-birthday');
+}
+
+function startLoading() {
+  goTo('screen-loading');
+  setTimeout(()=>document.getElementById('ls1').classList.add('show'),400);
+  setTimeout(()=>document.getElementById('ls2').classList.add('show'),1200);
+  setTimeout(()=>document.getElementById('ls3').classList.add('show'),2200);
+  setTimeout(()=>{generateResult();goTo('screen-result');document.querySelectorAll('.loading-step').forEach(s=>s.classList.remove('show'))},3500);
+}
+
+// ============================
+// CALCULATIONS
+// ============================
+function reduceToSingle(n){while(n>9&&n!==11&&n!==22&&n!==33){n=String(n).split('').reduce((a,b)=>a+parseInt(b),0)}return n}
+function calcLifePath(y,m,d){return reduceToSingle(reduceToSingle(y)+reduceToSingle(m)+reduceToSingle(d))}
+function calcBirthday(d){return reduceToSingle(d)}
+function calcPersonalYear(m,d,year){return reduceToSingle(reduceToSingle(m)+reduceToSingle(d)+reduceToSingle(year))}
+
+// ============================
+// CONTENT DATA
+// ============================
+const lifePathData = {
+  1:{name:'リーダー',keyword:'独立・開拓・意志',trait:'数秘術の観点から、あなたは生まれながらのパイオニアとしての資質をお持ちのようです。自分の道を自分で切り開いていこうとする強い意志と行動力が、あなたの中に息づいているのではないでしょうか。\n\n周囲がまだ迷っている時に、最初の一歩を踏み出せるのがあなたの真骨頂かもしれません。「やってみなければわからない」という精神で、前例のないことにも臆せず挑戦できる勇敢さがあるように感じます。\n\nリーダーシップは押しつけがましいものではなく、自然と人が「この人と一緒に歩みたい」と感じるような、行動で示すタイプではないでしょうか。あなたが本気で取り組んでいる姿を見て、周囲は勇気をもらっているかもしれません。\n\nまた、すべてを自分で背負おうとする傾向があるかもしれませんが、それは責任感の強さの表れともいえます。信頼できる人と力を分かち合うことで、あなたの可能性はさらに大きく広がっていくでしょう。'},
+  2:{name:'調和者',keyword:'協調・感受性・サポート',trait:'あなたは、その場の空気を誰よりも繊細に感じ取れる方ではないでしょうか。人の気持ちに自然と寄り添い、対立を穏やかに調和させる力をお持ちのようです。\n\nチームの中では「縁の下の力持ち」として、なくてはならない存在になっていることが多いかもしれません。あなたがそこにいるだけで、場の雰囲気が柔らかくなり、みんなが安心して本音を言えるようになる──そんな経験に心当たりはありませんか。\n\n感受性が豊かなぶん、人の痛みを自分のことのように感じてしまうこともあるかもしれません。でも、それは弱さではなく、かけがえのない才能といえるでしょう。その共感力があるからこそ、あなたの言葉は人の心に深く届くのです。\n\nもし自分の気持ちを後回しにしがちだと感じることがあれば、少しだけ意識を変えてみてください。あなた自身が満たされていることで、周囲にもっと多くの温かさを届けられるようになるはずです。'},
+  3:{name:'表現者',keyword:'創造性・喜び・コミュニケーション',trait:'あなたの中には、尽きることのない創造のエネルギーが流れているのかもしれません。言葉、アート、音楽、あるいは日常の会話の中で、人の心を動かす表現力をお持ちではないでしょうか。\n\nあなたが話し始めると、自然と周りに笑顔が広がっていく──そんな場面に心当たりはありませんか。それは、あなたの言葉に「温度」があるからかもしれません。感情と物語を込めて話すあなたのスタイルは、聞く人の心を明るく照らしているようです。\n\n好奇心旺盛で、新しいことに次々と興味を持つのも魅力のひとつ。ただ、同時にいくつも手を出してしまい、どれに集中すべきか迷うこともあるかもしれませんね。\n\nそんな時は、本当に心がワクワクするものを選んでみてください。一つのことに情熱を注ぐことで、あなたの才能はさらに何倍にも輝く可能性を秘めています。'},
+  4:{name:'堅実家',keyword:'安定・誠実・努力',trait:'あなたは、地に足のついた確かな歩みで人生を築いていく方ではないでしょうか。派手さよりも着実さを大切にし、コツコツと積み重ねることで大きな成果を生み出す力をお持ちのようです。\n\n約束を守り、責任を全うするあなたの姿は、周囲から深い信頼を集めているかもしれません。「あなたに任せれば安心」──そう感じている人が、きっと身近にいるのではないでしょうか。\n\n物事を論理的に整理し、計画を立てて実行する能力も素晴らしいものがあります。混乱した状況でも、あなたがいれば秩序が生まれ、チームが前に進める──そんな頼もしい存在です。\n\nもし、計画通りにいかないことで少し不安を感じることがあっても、大丈夫です。それはあなたの誠実さの裏返し。時には「まあいいか」と肩の力を抜くことで、思いがけない良いアイデアが生まれることもあるかもしれません。'},
+  5:{name:'冒険家',keyword:'自由・変化・好奇心',trait:'あなたは、変化と自由を愛する冒険家の資質をお持ちかもしれません。同じ場所にじっとしているよりも、新しい刺激や体験に心が躍るタイプではないでしょうか。\n\nその旺盛な好奇心が、あなたを様々な場所や経験へと導いているように感じます。旅先での出会い、未知の文化、新しい知識──それらすべてがあなたのエネルギー源なのかもしれません。\n\n適応力が高く、どんな環境でもすぐに馴染める柔軟さもお持ちのようです。人生の急な変化にも動じず、むしろ楽しめるのは、あなたならではの素晴らしい才能といえるでしょう。\n\n自由を大切にするあまり、一つのことを深く続けることに課題を感じることがあるかもしれませんが、それはあなたの可能性が広いことの表れでもあります。ひとつのテーマをじっくり掘り下げてみると、冒険はもっと豊かなものになっていく可能性があります。'},
+  6:{name:'奉仕者',keyword:'愛情・責任・調和',trait:'あなたは、深い愛情と責任感を持って周囲の人を支える方ではないでしょうか。家族や大切な人のために心を尽くすことに、喜びや充実感を感じているかもしれません。\n\n誰かが困っていると放っておけない──その温かさは、あなたの周りに安心と信頼の空間を自然と作り出しているようです。あなたがいる場所は、自然と「居心地の良い場所」になっているのではないでしょうか。\n\n美的センスにも恵まれていて、空間や人間関係の中に調和を生み出す力があるように感じます。バランスが崩れた状況を察知し、さりげなく整えていくのが得意なタイプかもしれません。\n\nもし、人の世話を焼きすぎて自分のことが後回しになっていると感じたら、ほんの少し立ち止まってみてください。あなたが自分自身を大切にすることは、決して「わがまま」ではありません。あなたが満たされていることで、その愛はもっと自然に周囲へと溢れていくでしょう。'},
+  7:{name:'探求者',keyword:'知性・直感・内省',trait:'あなたは、表面的なことでは満足できない深い知性をお持ちの方かもしれません。「なぜ？」「本当は？」と問い続け、物事の本質を見極めようとする探求心が、あなたの大切な原動力になっているのではないでしょうか。\n\n一人の時間を大切にし、静かな環境で思考を深めることで、他の人には見えない真実にたどり着くことがあるかもしれません。あなたの洞察力に驚かされた経験を持つ人が、きっと身近にいるのではないでしょうか。\n\n直感力も鋭く、論理では説明しきれない「なんとなくそう感じる」という感覚が、結果的に正しかったという経験もあるかもしれません。\n\n分析することが得意な反面、考えることに時間を使いすぎて行動が後回しになることもあるかもしれませんね。でも、それは慎重さの表れです。あなたの深い気づきを、信頼できる人と分かち合ってみてください。それはきっと、多くの人にとっての道しるべになるでしょう。'},
+  8:{name:'実現者',keyword:'達成・パワー・豊かさ',trait:'あなたは、目標を現実の形にする強い実行力をお持ちの方ではないでしょうか。ビジョンを描くだけでなく、それを具体的な成果に変えていく力があるように感じます。\n\n仕事やプロジェクトでは、自然とまとめ役の立場に立つことが多いかもしれません。物事を大きなスケールで捉え、効率的に進める能力は、周囲から高く評価されているのではないでしょうか。\n\n豊かさとの縁も深いタイプで、努力に見合った成果を手にする力をお持ちのようです。ただし、それは単なる「幸運」ではなく、あなたの地道な努力と戦略の結果といえるでしょう。\n\nもし、目標を追い求める中で大切な人との時間が少なくなっていると感じることがあれば、ほんの少しだけバランスを意識してみてください。心の豊かさ、人とのつながり、感謝の気持ち──それらが加わることで、あなたの達成感はさらに深い意味を持つものになっていくかもしれません。'},
+  9:{name:'完成者',keyword:'博愛・理想・智慧',trait:'あなたは、広い視野と深い慈愛をお持ちの方かもしれません。個人の利益だけでなく、もっと大きな視点で世界を見つめる力が備わっているのではないでしょうか。\n\n様々な立場の人の気持ちを理解できる懐の深さがあり、「あの人は私の気持ちをわかってくれる」と感じている人がきっと周りにいるはずです。\n\n芸術的なセンスにも恵まれ、美しいものに心を動かされる感性をお持ちのようです。人生の中で、何か大きなことを成し遂げたいという想いを抱えていらっしゃるのかもしれません。\n\n理想が高いゆえに、現実とのギャップに心が揺れることもあるかもしれませんが、それはあなたの志の高さの証です。「手放す」ことが大切なテーマかもしれません。古いものを手放すことで、新しいステージへの扉が開かれていきます。'},
+  11:{name:'直感のマスター',keyword:'霊感・インスピレーション・使命',trait:'マスターナンバー11をお持ちのあなたは、特別な感受性とインスピレーションに恵まれた方かもしれません。他の人には気づきにくいことを繊細に感じ取り、直感的に本質に近づく力があるようです。\n\nあなたの「なんとなくそう思った」という予感が、後になって正しかったという経験が何度もあるのではないでしょうか。\n\nクリエイティブな才能にも恵まれ、表現を通じて人々に大切なメッセージを届ける力があるように感じます。あなたの言葉や作品は、人の心の深い部分に優しく響くものがあるかもしれません。\n\nマスターナンバーには「成長の機会」も伴うといわれています。繊細な感性を持つがゆえに、周囲のエネルギーに影響を受けやすいと感じることがあるかもしれません。そんな時は、一人で過ごす静かな時間が大切です。心を落ち着け、自分のエネルギーをリセットすることで、あなた本来の輝きが戻ってくるでしょう。'},
+  22:{name:'実現のマスター',keyword:'カリスマ・組織力・大志',trait:'マスターナンバー22をお持ちのあなたは、壮大なビジョンを描き、それを現実世界で形にする稀有な資質をお持ちかもしれません。\n\n理想を追い求めながらも現実的でもあるという、一見相反する力を兼ね備えているようです。だからこそ、「夢物語」で終わらせず、実際に形にしていける可能性があるのではないでしょうか。\n\nリーダーシップとカリスマ性に溢れ、あなたの周りには自然と人が集まりやすいタイプかもしれません。大きなプロジェクトを動かす力があり、多くの人と一緒に価値あるものを創り出すことができるでしょう。\n\nこの大きな力が、時に重荷に感じられることがあるかもしれませんが、それは自然なことです。あなたの力は一朝一夕で発揮されるものではなく、人生をかけてゆっくりと花開いていくもの。目の前の小さな一歩を大切にしてください。'},
+  33:{name:'愛のマスター',keyword:'博愛・癒し・無条件の愛',trait:'マスターナンバー33をお持ちのあなたは、非常に珍しい数字の持ち主です。深い愛情と、人を癒す温かなエネルギーを備えて生まれてきた方かもしれません。\n\nあなたのそばにいると、なんだか心が落ち着く──そんな風に感じている人がきっと周りにいるのではないでしょうか。言葉がなくても、あなたの存在そのものが周囲に安らぎを届けているようです。\n\n家族や友人だけでなく、広い範囲の人々に対して温かな気持ちを持てるあなた。その姿は、周囲にとって大切な存在です。\n\nただ、人を想うあまり、ご自身のことを後回しにしてしまう傾向があるかもしれません。まずは自分自身を温かく労わることから始めてみてください。自分を大切にすることが、結果的に周囲にもっと多くの愛を届けることにつながっていくでしょう。'}
+};
+
+const birthdayData = {
+  1:{name:'開拓の才能',desc:'リーダーシップと独立心に恵まれているようです。新しいことを始める力をお持ちで、先頭に立つことでその才能がより輝く可能性があります。'},
+  2:{name:'協調の才能',desc:'人と人をつなぐ橋渡しの力をお持ちかもしれません。細やかな気配りと共感力で、チームワークを自然と高めていける才能があるように感じます。'},
+  3:{name:'表現の才能',desc:'言葉やアートで人を魅了する表現力をお持ちのようです。コミュニケーション能力が高く、場を明るくする天賦の才があるのではないでしょうか。'},
+  4:{name:'構築の才能',desc:'物事を着実に形にする実行力をお持ちかもしれません。計画を立て、成果を積み上げていく力があり、組織の基盤を作るのが得意なタイプのようです。'},
+  5:{name:'適応の才能',desc:'変化を楽しみ、自在に適応する力をお持ちのようです。多様な経験から学び、それを活かす柔軟性があり、新しい環境でもすぐに力を発揮できるかもしれません。'},
+  6:{name:'育成の才能',desc:'人を育て、支える力をお持ちではないでしょうか。美的センスと責任感を兼ね備え、周囲が成長するのを温かく見守ることで、ご自身も満たされるタイプかもしれません。'},
+  7:{name:'分析の才能',desc:'物事の本質を見抜く洞察力をお持ちのようです。ひとつのテーマを深く掘り下げることで、他の人には見えない発見にたどり着く才能があるかもしれません。'},
+  8:{name:'統率の才能',desc:'物事を効率的に進め、チームをまとめ上げる力をお持ちかもしれません。全体を見渡してベストな判断を下すセンスが備わっているようです。'},
+  9:{name:'共感の才能',desc:'幅広い視野と深い共感力をお持ちのようです。人の気持ちに寄り添い、社会に貢献したいという志が、あなたの原動力になっているのかもしれません。'}
+};
+
+const personalYearData = {
+  1:{theme:'始まりと種まきの年',desc:'2026年は、あなたにとって新しいサイクルの始まりになるかもしれません。新しいことにチャレンジするには良いタイミングといえそうです。\n\n温めていたアイデアや計画があれば、今年は一歩を踏み出してみるのも良いでしょう。「自分はどうしたいのか」を軸にして過ごすことで、道が少しずつ開けていく可能性があります。'},
+  2:{theme:'信頼と協調の年',desc:'2026年は、じっくりと人との関係を育む時期になるかもしれません。目に見える大きな成果よりも、信頼関係を深めることに意識を向けてみてはいかがでしょうか。\n\n協調性を大切にし、相手の立場に立って物事を考えることで、かけがえのない絆が生まれる可能性があります。焦らず、あなたのペースで進んでみてください。'},
+  3:{theme:'表現と喜びの年',desc:'2026年は、あなたの創造性が活発になる年かもしれません。自分の思いを言葉や形にして外に出してみることで、思いがけない良い出会いやチャンスにつながる可能性があります。\n\n楽しいと感じることを積極的に取り入れてみてください。ワクワクする感覚を大切にすることが、この年の運気をさらに良い方向に導いてくれるでしょう。'},
+  4:{theme:'土台づくりの年',desc:'2026年は、地に足をつけて土台を固める時期かもしれません。生活の基盤や日々の習慣を見直してみることが、実は一番の近道になる可能性があります。\n\n今年の地道な積み重ねが、来年以降に大きな実りとなって返ってくる──そんな年になりそうです。焦らず、着実に。'},
+  5:{theme:'変化と冒険の年',desc:'2026年は、人生に新しい風が吹き込む年かもしれません。環境の変化や新しい出会いなど、今までとは違う流れを感じることがあるかもしれません。\n\n変化を前向きに受け入れてみることで、人生が大きく広がっていく可能性があります。新しい体験を楽しみながら、自分らしさも忘れずに。'},
+  6:{theme:'愛と調和の年',desc:'2026年は、家族や大切な人との関係がさらに深まる年になるかもしれません。身近な人との時間を大切にすることで、心が温かく満たされていくのを感じるでしょう。\n\n与えることと受け取ることのバランスを意識してみてください。美しいものに触れる時間を意識的に作ると、心がより整っていくかもしれません。'},
+  7:{theme:'内省と学びの年',desc:'2026年は、自分自身と静かに向き合う時間が大切になるかもしれません。内面の充実や学びに自然と意識が向かう年です。\n\n読書、学び、一人で考える時間──そうした静かなひとときが、これからの人生の大きなヒントを与えてくれる可能性があります。'},
+  8:{theme:'収穫と充実の年',desc:'2026年は、これまでの努力が実を結ぶ可能性のある年です。仕事での評価アップや、目標の達成など、具体的な成果を感じられるかもしれません。\n\n成果が見えた時こそ謙虚さと感謝の気持ちを忘れないことが、さらなる良い流れを引き寄せる鍵になりそうです。'},
+  9:{theme:'完成と感謝の年',desc:'2026年は、ひとつのサイクルの締めくくりの年かもしれません。これまでの経験を振り返り、心の中を整理する時期に来ているようです。\n\n「もう自分には合わなくなったもの」を手放すことで、来年からの新しいステージに向けてスペースが生まれます。感謝の気持ちを持ちながら、穏やかに過ごしてみてください。'}
+};
+
+// ============================
+// BRANCHING CONTENT (Q2-Q5 per category)
+// ============================
+const q2Content = {
+  // Love Q2
+  no_encounter: 'まだ出会いがないと感じていらっしゃるのですね。でも、あなたの数字が示す魅力は、すでに十分に備わっているようです。出会いは「探しに行く」ものではなく、自分自身が輝いている時に自然と引き寄せられるものかもしれません。日常の中で少しだけ新しい場所に足を運んだり、新しい趣味を始めたりすることが、予想外の出会いにつながることもあるでしょう。',
+  unrequited: '想いを伝えるのは、とても勇気がいることですよね。あなたの数字は、内に秘めた豊かな感情を持っていることを示しているようです。気持ちを伝えることは「結果」を求めることではなく、自分自身に正直になるための一歩かもしれません。タイミングを見極める直感力もお持ちのようですから、心が「今だ」と感じた時を大切にしてみてください。',
+  partner_issue: 'パートナーとの関係に悩まれているのですね。長く一緒にいると、お互いの「当たり前」にすれ違いが生まれることは自然なことかもしれません。あなたの数字は、関係を修復する力を持っていることを示唆しています。まずは相手を変えようとするのではなく、ご自身の気持ちを丁寧に言葉にしてみることから始めてみてはいかがでしょうか。',
+  marriage: '結婚や将来のことを真剣に考えていらっしゃるのですね。あなたの数字は、人生の大きな決断に対して深い洞察力を持っていることを示しているようです。結婚は「ゴール」ではなく「新しい旅の始まり」。焦る必要はありません。あなたが自分自身を大切にし、今の生活を充実させていく中で、自然とベストなタイミングが訪れるのではないでしょうか。',
+  // Career Q2
+  fit: '今の仕事が自分に合っているのか──その問いを持てること自体が、あなたの成長の証かもしれません。あなたの数字は、変化を恐れず前に進む力を示しています。まずは今の仕事の中で「好き」と感じる部分と「苦手」と感じる部分を整理してみてください。その答えの中に、次のステップへのヒントが見つかるかもしれません。',
+  change_job: '転職や独立を考えているのですね。あなたの数字は、新しい環境で力を発揮できる可能性を示しているようです。ただ、「逃げ」ではなく「向かう」気持ちで動くことが大切かもしれません。「何から離れたいか」ではなく「何に向かいたいか」を明確にすることで、より良い選択ができるでしょう。',
+  motivation: 'やりがいを見失っているように感じるのですね。あなたの数字は、本来とても情熱的なエネルギーを持っていることを示しています。今の状態は、次のステージに向かうための「充電期間」なのかもしれません。日常の中で小さな「ワクワク」を見つけることが、情熱を取り戻すきっかけになるでしょう。',
+  work_env: '職場の環境に疲れを感じていらっしゃるのですね。あなたの数字は、周囲の空気を敏感に感じ取る力を示しているようです。それはとても繊細で素晴らしい才能ですが、自分を守る方法も同じくらい大切です。すべてを一人で抱え込まず、信頼できる人に気持ちを話してみることが、状況を好転させるきっかけになるかもしれません。',
+  // Money Q2
+  increase_income: '収入を増やしたいというお気持ちは、向上心の表れです。あなたの数字は、豊かさを引き寄せる力を持っていることを示しているようです。収入アップの鍵は、あなたの持つ才能や強みをさらに磨くことにあるかもしれません。「好き」と「得意」が重なるところに、収入を増やすヒントが隠れていることが多いものです。',
+  future_anxiety: '将来のお金に対する不安を感じていらっしゃるのですね。漠然とした不安は、誰もが感じるものです。あなたの数字は、着実に物事を積み上げていく力を示しています。まずは「何が不安なのか」を具体的に書き出してみてください。漠然とした不安は、具体的にすることで対処しやすくなります。',
+  saving_lost: '資産形成の方法に迷われているのですね。あなたの数字は、計画的に物事を進める才能を持っていることを示しているようです。大きなことから始める必要はありません。まずは毎月の小さな金額からでも、「仕組み」として続けられる方法を見つけることが大切かもしれません。',
+  guilt_spending: '自分のためにお金を使うことに抵抗を感じるのですね。あなたの数字は、人のために尽くす優しさを持っていることを示しています。でも、自分への投資も大切な「未来への種まき」かもしれません。あなたが元気で充実していることが、結果的に周囲にも良い影響を与えるのではないでしょうか。',
+  // Relationship Q2
+  work_rel: '職場の人間関係に悩まれているのですね。毎日顔を合わせる相手だからこそ、ストレスが大きく感じられるのは自然なことです。あなたの数字は、人との関わりの中で学び成長する力を持っていることを示しています。すべての人と仲良くなる必要はありません。「適切な距離感」を見つけることが、職場での安心感につながるかもしれません。',
+  family_rel: '家族やパートナーとの関係に悩まれているのですね。身近な人だからこそ、期待や甘えが大きくなりがちです。あなたの数字は、深い愛情を持つ方であることを示しています。まずはお互いの「当たり前」を見直し、小さな感謝を言葉にしてみてください。それだけで関係に変化が生まれることがあります。',
+  friend_rel: '友人関係が希薄になっていると感じるのですね。大人になると、意識しなければ人間関係は自然と疎遠になっていくものです。あなたの数字は、人とのつながりを大切にする力を持っていることを示しています。気になる友人に、一通のメッセージを送ってみてください。小さなきっかけから、温かい関係が再び芽生えるかもしれません。',
+  general_rel: '人付き合い全般に疲れを感じていらっしゃるのですね。それは決して弱さではなく、あなたが人との関わりに真剣に向き合っている証拠かもしれません。あなたの数字は、少数の人と深くつながることで力を発揮するタイプであることを示しているようです。無理にたくさんの人と付き合う必要はありません。あなたのペースで、心地よい関係を選んでいってください。',
+  // Wellness Q2
+  no_fulfillment: '毎日に充実感が感じられないのですね。それは、あなたの中で「もっと豊かな毎日を送りたい」という前向きな気持ちが動き始めているサインかもしれません。あなたの数字は、日常の中に喜びを見つける感性を持っていることを示しています。まずは一日の中で「ほっとする瞬間」を意識的に作ってみてはいかがでしょうか。',
+  low_energy: 'エネルギー不足を感じていらっしゃるのですね。それは体からの大切なメッセージかもしれません。あなたの数字は、本来とてもパワフルなエネルギーを持っていることを示しています。今は充電期間と捉えて、無理をせず休息を取ることが大切です。小さな楽しみや心地よい習慣を生活に取り入れることで、少しずつエネルギーが戻ってくるでしょう。',
+  anxiety: '漠然とした不安を感じやすいのですね。それはあなたの感受性の高さの表れかもしれません。あなたの数字は、繊細な感性と深い洞察力を持っていることを示しています。不安は「未来のまだ起きていないこと」に対する反応であることが多いものです。「今、この瞬間」に意識を向けることで、心が少しずつ落ち着いていくかもしれません。',
+  bad_rhythm: '生活リズムの乱れを感じていらっしゃるのですね。リズムの乱れは心身のバランスに影響を与えやすいといわれています。あなたの数字は、秩序と調和を大切にする力を持っていることを示しているようです。一度にすべてを変える必要はありません。まずは一つだけ、「毎日同じ時間にする習慣」を作ってみてください。小さなリズムが、やがて全体を整えてくれるかもしれません。',
+};
+
+const q3Content = {
+  // Love Q3
+  too_devoted: 'あなたの「尽くす力」は、本当に素晴らしい愛情の表現です。ただ、相手のために自分を削りすぎると、関係のバランスが崩れてしまうこともあるかもしれません。「愛すること」と「自分を大切にすること」は両立できます。あなたが自分自身を満たしている時、その愛はもっと自然で豊かなものになるのではないでしょうか。',
+  suppress: '本音を言えないのは、相手を大切に想うがゆえのことかもしれません。でも、我慢し続けることは、やがて心の中に小さな不満を積み重ねてしまう可能性があります。「こう感じた」と自分の気持ちを穏やかに伝える練習を、信頼できる人から始めてみてください。素直さは、関係をさらに深くしてくれるはずです。',
+  idealistic: '理想が高いことは、あなたが自分の人生に妥協しない強さの表れです。ただ、「完璧な人」を探すよりも、「一緒に成長できる人」を見つける方が、長い目で見ると幸せにつながるかもしれません。相手の「不完全さ」の中にこそ、愛おしさが見つかることもあるのではないでしょうか。',
+  fear_hurt: '過去の経験から恋愛に慎重になるのは、とても自然なことです。傷つくことを恐れるのは、あなたが真剣に人を愛せる証拠でもあります。無理に傷を忘れる必要はありません。ゆっくりと自分のペースで心を開いていけば大丈夫です。準備ができた時、あなたの前には素敵な出会いが待っているかもしれません。',
+  // Career Q3
+  perfectionist: '完璧を目指す姿勢は、あなたの仕事の質の高さにつながっている素晴らしい資質です。ただ、100点を目指すことで疲弊してしまうなら、「80点で十分」と自分に許可を出してみてください。実は、80点のスピードで動くことが、長期的には最も良い成果を生み出すことが多いのかもしれません。',
+  low_confidence: '自信が持てないと感じるのは、あなたが高い基準を持っている証拠かもしれません。周りと比べる代わりに、過去の自分と比べてみてください。きっと成長しているはずです。あなたの数字は、着実に力をつけていくタイプであることを示しています。自分の歩みを信じてあげてください。',
+  no_passion: 'やりたいことが見つからないのは、実は多くの人が感じていることです。「見つけなければ」と焦る必要はありません。まずは日常の中で「少し気になること」「嫌いじゃないこと」に目を向けてみてください。情熱は最初から燃え上がるものではなく、小さな火種から育てていくものかもしれません。',
+  cant_delegate: '人に頼るのが苦手なのは、責任感の強さの表れかもしれません。でも、全部を一人で抱えると、いつか限界が来てしまいます。「任せること」は「放棄すること」ではなく、「信頼すること」。まずは小さなことから、誰かに委ねてみてください。意外と、相手も頼りにされることを嬉しく感じているかもしれません。',
+  // Money Q3
+  impulsive: '衝動的にお金を使ってしまうのは、あなたの中に「今を楽しみたい」というエネルギーが溢れている証拠かもしれません。その感性は素晴らしいものです。ただ、買い物をする前に「24時間ルール」を試してみてはいかがでしょうか。一日待ってみて、それでも欲しければ買う。この小さな習慣が、大きな変化をもたらすかもしれません。',
+  cant_refuse: '人付き合いでの出費が多いのは、あなたが周囲との関係を大切にしている証拠です。でも、無理をして付き合い続ける必要はありません。「今月は控えめにしているんだ」と正直に伝えることは、決して恥ずかしいことではないのではないでしょうか。本当に大切な人は、あなたの事情を理解してくれるはずです。',
+  avoid_money_talk: 'お金の話を避けたくなる気持ちは理解できます。でも、お金は生活の大切な一部です。あなたの数字は、実は豊かさとの良い縁を持っていることを示しています。お金について学び、知識を持つことで、お金への苦手意識が自然と薄れていくかもしれません。',
+  over_worry: '将来を心配する気持ちは、計画性の高さの表れです。ただ、心配しすぎて「今」を楽しめなくなっているとしたら、少しバランスを見直してみてもいいかもしれません。未来への備えも大切ですが、今の自分に適度なご褒美を与えることも、人生を豊かにする投資のひとつではないでしょうか。',
+  // Relationship Q3
+  people_watching: '人の表情や反応に敏感なのは、あなたの共感力の高さの表れです。ただ、他人の感情を背負いすぎると疲れてしまいます。「相手の気持ちは相手のもの」と少しだけ境界線を意識してみてください。あなたの優しさは変わらなくても、心が楽になるかもしれません。',
+  cant_speak: '自分の意見を飲み込んでしまうのは、場の調和を大切にするあなたの優しさかもしれません。でも、伝えないことで溜まったストレスは、やがて関係に影を落とすこともあります。まずは「私はこう感じた」という「I（アイ）メッセージ」で伝える練習をしてみてはいかがでしょうか。',
+  slow_trust: '信頼関係をじっくり築くのは、あなたの慎重さと誠実さの表れです。すぐに心を開けなくても、まったく問題ありません。あなたが時間をかけて築いた信頼は、とても深くて強いものになるはずです。自分のペースを大切にしてください。',
+  distance: '人との距離感に悩むのは、あなたが関係性に真剣に向き合っている証拠です。「ちょうどいい距離」は相手によって異なるもの。完璧な距離感を一度で見つける必要はありません。少しずつ調整しながら、お互いにとって心地よい関係を育てていけば大丈夫です。',
+  // Wellness Q3
+  no_time: '自分の時間が取れないと感じるのは、それだけ多くのことに責任を持っている証拠かもしれません。ただ、一日の中で「たった5分」でも自分だけの時間を作ることで、心の余裕が大きく変わることがあります。完璧を目指さず、小さな「自分時間」から始めてみてください。',
+  overwhelmed: 'やるべきことに追われる感覚は、責任感の強いあなたらしい悩みかもしれません。すべてを同時にこなそうとせず、「今日やるべきこと」を3つだけ選んでみてはいかがでしょうか。優先順位をつけることで、心の負担はぐっと軽くなるかもしれません。',
+  joyless: '以前のように楽しめなくなっている──そう感じるのは、心が休息を求めているサインかもしれません。「楽しまなければ」と焦る必要はありません。まずはゆっくり休むことを自分に許してあげてください。エネルギーが回復すれば、自然と楽しいと感じる感覚も戻ってくるでしょう。',
+  lonely: '一人の時間が多すぎると感じるのですね。孤独を感じることは、つながりを求める健全な心の動きです。大きなことをする必要はありません。近所の店で店員さんと一言交わしたり、オンラインのコミュニティに参加してみたり。小さなつながりから、温かさが広がっていくことがあります。',
+};
+
+const q4Content = {
+  // Love Q4
+  natural: '「自然体でいられる関係」を理想とするあなたの感覚は、とても健やかです。無理をしない関係こそが、長く続く愛の形かもしれません。そのためにはまず、あなた自身が自分のありのままを受け入れることが第一歩です。自分に正直でいることで、同じように自然体でいられる相手が引き寄せられるのではないでしょうか。',
+  grow_together: '「お互いに成長できる関係」を求めるあなたは、向上心に溢れた方です。ただ、成長を求めすぎると関係に緊張が生まれることもあります。大切なのは「一緒に楽しみながら成長すること」。競争ではなく、二人三脚のように歩める関係が、あなたに最も合っているかもしれません。',
+  deep_trust: '「深い信頼で結ばれた関係」を理想とするあなた。信頼は一日にして築かれるものではなく、小さな約束を積み重ねることで育まれていくものです。あなたの誠実さは、そんな信頼関係を築く上で最も大切な土台になるでしょう。',
+  mutual_freedom: '「自由を尊重し合える関係」を求めるあなたは、自立した大人の恋愛を望んでいるのかもしれません。依存ではなく、選び合う関係。そのためには、まずあなた自身が一人でも充実していることが大切です。自立した二人が出会うことで、最も自由で、最も深い絆が生まれるのではないでしょうか。',
+  // Career Q4
+  passion_work: '「好きなことを仕事に」── それは簡単ではないかもしれませんが、あなたの数字はその可能性を示しているようです。まずは副業や趣味の延長から小さく始めてみるのも良いでしょう。「好き」を「価値」に変えることができた時、仕事は人生そのものを輝かせるものになるかもしれません。',
+  balance_work: '安定と充実の両立を目指すあなたは、とてもバランス感覚に優れた方です。両方を同時に手に入れるのは時間がかかるかもしれませんが、焦る必要はありません。まずは今の環境の中で「充実感を感じる瞬間」を増やしていくことが、理想に近づく第一歩になるでしょう。',
+  team_work: '「仲間と大きなことを成し遂げたい」── その思いは、あなたのリーダーシップと協調性の表れかもしれません。良いチームは、お互いの強みを活かし合うことで生まれます。あなたの強みを知り、それをチームに活かす方法を見つけることが、理想の実現への近道になるでしょう。',
+  free_work: '自由な働き方を望むあなたは、時代の流れに敏感な方かもしれません。フリーランス、リモートワーク、副業── 選択肢は広がっています。まずは小さく始めて、自分に合ったスタイルを見つけていくことが大切です。自由には責任も伴いますが、あなたにはそれを担う力があるように感じます。',
+  // Money Q4
+  money_freedom: '好きなことに自由にお金を使える生活── それは多くの人の理想ですよね。そのためには「我慢」ではなく「選択」の意識が大切かもしれません。本当に価値を感じるものにお金を使い、それ以外を手放す。そんなメリハリが、自由な使い方への道を開いてくれるでしょう。',
+  money_security: '将来の安心を手に入れたいという思いは、とても建設的です。不安を「行動」に変えることが、安心への一番の近道かもしれません。まずは小さな一歩から。情報を集め、できることから始めていくことで、漠然とした不安が少しずつ「安心」に変わっていくでしょう。',
+  money_giving: '大切な人のためにお金を使いたいというあなたの気持ちは、とても温かいものです。その愛情は、お金の額ではなく気持ちにこそ価値があります。まずはあなた自身が経済的に安定することが、大切な人を支え続けるための土台になるかもしれません。',
+  money_peace: '「お金に振り回されない心」── それは物質的な豊かさ以上に価値のあるものかもしれません。お金に対する不安やストレスから解放されるには、「足りている」と感じる心を育てることが大切です。今あるものへの感謝から始めてみてください。',
+  // Relationship Q4
+  honest_rel: '本音で語り合える関係を求めるあなた。それは深い関係の基盤です。ただ、本音を言うためには、まず自分自身の気持ちを知ることが必要です。日記を書いたり、自分と対話する時間を持つことで、「本当の自分の声」が聞こえてくるかもしれません。',
+  respect_rel: 'お互いを尊重し合える関係── それは最も健やかな人間関係の形かもしれません。尊重は「違いを認めること」から始まります。自分と異なる意見や価値観に出会った時、それを「間違い」ではなく「違い」として受け止めてみてください。その姿勢が、尊重し合える関係の土台になるでしょう。',
+  safe_rel: '安心できる関係を求めるあなたの気持ちは、とても大切なものです。安心感は、小さな「大丈夫だよ」の積み重ねで育まれていきます。完璧な関係を探すよりも、お互いの弱さを見せ合える関係を育てることが、あなたの求める安心感につながるかもしれません。',
+  inspiring_rel: '刺激を与え合える関係を求めるあなたは、成長意欲の高い方です。そんな関係を見つけるには、まず自分自身が「面白いと思うこと」に本気で取り組むことが大切かもしれません。何かに情熱を注いでいるあなたの姿が、同じ志を持つ人を引き寄せるのではないでしょうか。',
+  // Wellness Q4
+  active_life: 'メリハリのある毎日を送りたいあなたは、エネルギッシュな方かもしれません。充実した日々のためには、「全力で動く時間」と「全力で休む時間」の両方が大切です。予定を詰め込みすぎず、意識的に「何もしない時間」も組み込んでみてください。',
+  calm_life: '穏やかな毎日を望むあなたの感覚は、とても賢明です。心の平穏は、外側の環境だけでなく、内側の在り方から生まれます。毎朝5分だけ、静かに深呼吸をする時間を作ってみてください。その小さな習慣が、一日全体の穏やかさにつながるかもしれません。',
+  joyful_life: '好きなことに囲まれた毎日── それはあなたの心が本当に求めていることかもしれません。「好き」を後回しにせず、毎日少しでも好きなことに触れる時間を作ってみてください。小さな喜びの積み重ねが、日々の充実感を大きく変えてくれるでしょう。',
+  connected_life: '大切な人と笑い合える毎日── それは何より温かい暮らしの形ですね。そのためには、日常の中で「ありがとう」「嬉しい」を言葉にすることが大切かもしれません。当たり前のことに感謝を伝えることで、つながりはさらに深く、温かくなっていくでしょう。',
+};
+
+const q5Content = {
+  // Love Q5
+  destiny_meet: '運命の出会いは、いつ、どこで訪れるかわかりません。ただ、あなたが自分らしく生きている時、最も自然な形で訪れるものかもしれません。出会いを「待つ」のではなく、自分の人生を充実させることに集中してみてください。輝いているあなたの姿が、素敵なご縁を引き寄せるのではないでしょうか。',
+  honesty_courage: '素直になる勇気── それは恋愛において最も大切な力のひとつかもしれません。完璧な言葉を探す必要はありません。「あなたといると嬉しい」「今日は楽しかった」── そんな素朴な言葉から始めてみてください。あなたの素直さは、相手の心にまっすぐ届くはずです。',
+  deepen_hint: '関係を深めるための一番のヒントは、「相手に興味を持ち続けること」かもしれません。長く一緒にいると「わかったつもり」になりがちですが、人は日々変化しています。「最近どう？」と心から尋ねることが、関係に新鮮な風を吹き込んでくれるでしょう。',
+  self_love: '自分を好きになることは、すべての良い関係の出発点かもしれません。完璧な自分を目指すのではなく、不完全な自分も含めて「これが私だ」と受け入れること。自分に優しくなれた時、恋愛もきっと良い方向に動き始めるのではないでしょうか。',
+  // Career Q5
+  career_direction: '進むべき方向性を見つけるには、まず「自分が大切にしたい価値観」を明確にすることが近道かもしれません。お金、自由、やりがい、人間関係── 何を一番に考えたいですか？ その答えが、キャリアの羅針盤になるでしょう。あなたの数字が示す本質も、きっとその道しるべになるはずです。',
+  career_courage: '一歩を踏み出す勇気は、「失敗してもいい」と自分に許可を出すことから始まるかもしれません。失敗は終わりではなく、学びの機会です。あなたの数字は、チャレンジから多くを得る力を持っていることを示しています。小さなチャレンジから始めてみてください。',
+  career_strength: 'あなたの強みは、あなた自身にとっては「当たり前すぎて気づかない」ことが多いものです。周囲の人に「私の良いところって何だと思う？」と聞いてみてください。思いがけない答えが返ってくるかもしれません。あなたの数字が示す才能も、きっとその中に含まれているはずです。',
+  career_chance: '良い出会いやチャンスは、「今いる場所」の少し外側にあることが多いようです。いつもと違うイベントに参加したり、興味のある分野の人に話を聞きに行ったり。小さな行動が、大きなチャンスの扉を開くかもしれません。',
+  // Money Q5
+  income_hint: '収入を増やすヒントは、あなたの数字が示す才能の中にあるかもしれません。自分の「好き」と「得意」と「人の役に立てること」が重なる部分を探してみてください。それが見つかった時、自然と収入にもつながっていく可能性があります。',
+  management: '賢いお金の管理法は、実はシンプルです。「収入 - 貯蓄 = 使えるお金」という順番を意識してみてください。先に貯蓄を確保してから残りで生活する。この発想の転換が、無理なくお金が貯まる仕組みの第一歩になるかもしれません。',
+  unblock: 'お金に対するブロックは、多くの場合、幼少期の体験や環境から来ているといわれています。「お金は悪いものだ」「お金持ちは嫌な人だ」── そんな思い込みがあるかもしれません。お金は単なるツール。良いことにも悪いことにも使えます。あなたが豊かになることで、もっと多くの人を幸せにできる可能性があるのではないでしょうか。',
+  abundance: '豊かさを感じるマインドの第一歩は、「今あるもの」に目を向けることかもしれません。失っているものを数えるのではなく、持っているものに感謝する。そんな小さな意識の転換が、不思議と良い流れを引き寄せることがあります。あなたの数字は、豊かさとの良い縁を示しています。',
+  // Relationship Q5
+  rel_openness: '心を開くことは、勇気のいる行為です。でも、小さなことから始めて大丈夫。「今日は少し疲れた」「これ美味しいね」── そんな何気ない一言が、心を開くことの第一歩になります。完璧に心を開く必要はありません。ほんの少しずつ、あなたのペースで。',
+  rel_boundary: '境界線を引くことは、自分を守るためだけでなく、健全な関係を築くためにも大切なスキルです。「NO」と言うことは、相手を拒絶することではなく、自分を大切にすること。あなたが自分を守れるようになった時、人間関係はもっと楽になるかもしれません。',
+  rel_trust: '信頼できる仲間は、一朝一夕には見つからないかもしれません。でも、あなたが誠実に人と向き合い続ければ、必ず同じように誠実な人が現れるでしょう。数は少なくても、本当に信頼し合える関係は何よりの宝物です。',
+  rel_authenticity: 'ありのままの自分でいられる安心感── それは最も贅沢な人間関係かもしれません。まずは、自分自身が「こんな自分でもいいんだ」と認めてあげることから始めてみてください。自分を受け入れることができた時、同じように受け入れてくれる人が自然と集まってくるでしょう。',
+  // Wellness Q5
+  recharge: 'エネルギーを取り戻すために大切なのは、「頑張ること」ではなく「手放すこと」かもしれません。「〜しなければ」を一つずつ減らしてみてください。そして、あなたが心から「気持ちいい」と感じることをしてあげてください。体は素直です。心地よさを与えれば、自然とエネルギーが戻ってくるでしょう。',
+  margin: '心の余裕を取り戻すには、まず物理的な「余白」を作ることが効果的かもしれません。予定を一つ減らす、部屋の一角を片付ける、スマホを見ない時間を作る。外側の余白が、内側の余裕につながっていきます。「何もしない時間」は、怠惰ではなく「自分への投資」です。',
+  enjoyment: '毎日を楽しむ力は、特別なイベントがなくても発揮できるものです。朝のコーヒーの香りを楽しむ、空の色に気づく、好きな音楽を聴く── そんな小さな「味わい」の積み重ねが、日常を豊かに変えてくれるかもしれません。「楽しむこと」に許可を出してあげてください。',
+  self_care: '自分を大切にすることは、利己的なことではありません。あなたが元気で満たされていることが、周囲にとっても一番の安心材料です。「自分のための時間」をスケジュールに入れることから始めてみてください。あなたにとってのセルフケアが何なのか、心の声に耳を傾けてみてください。',
+};
+
+// LP × category concern advice
+function getConcernAdvice(lp, cat) {
+  const d = {
+    love:{1:'恋愛においても、あなたらしさを大切にすることが良い関係につながるかもしれません。自分の軸を持ちながら相手を尊重するバランスが、あなたをさらに魅力的に見せるのではないでしょうか。',2:'愛情深いあなたは、パートナーとの心のつながりを何より大切にされるタイプかもしれません。相手の気持ちを読み取る力は素晴らしいですが、ご自身の気持ちも同じくらい大切に伝えてみてください。',3:'一緒にいて楽しい、笑い合えるパートナーシップが、あなたを最も輝かせるかもしれません。あなたの明るさと表現力は、そのままで十分に魅力的です。',4:'時間をかけて信頼を育む恋愛スタイルが合っているかもしれません。完璧な関係を求めるよりも、一緒に成長していける関係を楽しんでみてはいかがでしょうか。',5:'お互いの自由と時間を尊重し合える関係が、あなたにとって心地よいものになるかもしれません。一人の方との関係を深める中にも、新しい発見がたくさんあるでしょう。',6:'愛することが得意なあなたですが、パートナーの成長を信じて見守ることも素敵な愛の形かもしれません。自立した上で寄り添い合える関係が理想的ではないでしょうか。',7:'心を開くのに時間がかかるかもしれませんが、あなたの内面を理解してくれる方との出会いを大切にしてください。深い知的なつながりが、あなたの恋愛を豊かにするでしょう。',8:'お互いの夢を応援し合えるパートナーが理想的かもしれません。時には素直な気持ちを見せることが、関係をさらに深める鍵になるでしょう。',9:'「ありのままの自分」を見せられる関係が一番の幸せかもしれません。完璧を求めるよりも、不完全さを受け入れ合えることが、真の愛につながるのではないでしょうか。',11:'出会いの場でも「何かを感じる」瞬間を大切にしてみてください。あなたの繊細さを理解してくれる方との出会いが、人生に大きな喜びをもたらすかもしれません。',22:'大きなビジョンを持つあなたには、同じ方向を見つめられるパートナーが素敵な存在になるでしょう。',33:'深い愛情を注げるあなたですが、ご自身も愛される権利があることを忘れないでください。'},
+    career:{1:'自分の裁量で動ける環境が、あなたの力を最も引き出してくれるかもしれません。新しい道を切り開くことに才能があるようです。',2:'チームの中で力を発揮するあなたは、人と人をつなぐ役割で輝く可能性があります。あなたの存在はチームにとって大きな力です。',3:'クリエイティブな才能を活かせるフィールドで、あなたの力はさらに開花するかもしれません。「楽しい」と感じることの中に天職のヒントが隠れているようです。',4:'正確さと継続力が求められる分野で真価が発揮されるかもしれません。コツコツと積み上げる仕事にこそ、あなたの力が光ります。',5:'変化と刺激のある環境で、あなたのエネルギーはさらに活性化するかもしれません。新しい挑戦に心が躍るタイプではないでしょうか。',6:'人の成長を支え、育てる仕事に深い充実感を覚えるかもしれません。職場の雰囲気を良くする力も、あなたの隠れた才能かもしれません。',7:'専門性を深められる環境が最も適しているかもしれません。一つのテーマを掘り下げることで、圧倒的な価値を生み出す可能性があります。',8:'マネジメントや戦略立案など、スケールの大きな仕事で力を発揮するタイプのようです。',9:'社会貢献や人のためになる活動に関わることで、深い充実感を得られるかもしれません。',11:'直感とインスピレーションを活かせる仕事が向いているかもしれません。「もっと自分らしい仕事がしたい」という気持ちは正しいサインです。',22:'大きなプロジェクトを形にする力をお持ちのようです。焦らず経験を積んでいけば、大きな花を咲かせるでしょう。',33:'愛と癒しを通じて人に貢献する仕事で、あなたの真価が発揮されるかもしれません。'},
+    money:{1:'お金に対して前向きなエネルギーをお持ちのようです。自分で稼ぐ力があり、自己投資が良い結果につながりやすいタイプかもしれません。',2:'堅実にお金を管理できる才能をお持ちかもしれません。コツコツと積み上げる方法が合っているようです。',3:'楽しいことにお金を使いたくなるのは自然なこと。あなたの表現力やコミュニケーション力は、収入を生み出す力になる可能性があります。',4:'計画的な金銭管理が得意なタイプかもしれません。長期的な視点で資産を築いていく力をお持ちのようです。',5:'複数の収入源を持つことが、あなたのスタイルに合っているかもしれません。柔軟な資産形成を心がけてみてください。',6:'大切な人のために使うお金には惜しみがないかもしれませんが、ご自身への投資も大切な支出です。',7:'知識や学びへの投資が、結果的に最大の財産になるかもしれません。じっくり分析してから動くのが吉です。',8:'豊かさとの縁が深い数字をお持ちのようです。感謝の気持ちで還元することが、さらなる良い循環を生む鍵になりそうです。',9:'お金を「良いことに使う」と決めると、不思議と良い流れが生まれやすいかもしれません。',11:'直感的にお金の流れを感じ取れる力がありそうです。クリエイティブな才能が収入に結びつく可能性も高いでしょう。',22:'大きなスケールで物事を考えるのが得意なあなたには、大きな仕組みづくりが合っているかもしれません。',33:'必要な時に必要なものが不思議と手に入る── そんな金運の流れをお持ちのようです。'},
+    relationship:{1:'周囲をリードする立場になりやすいあなた。時には周りの人に甘えてみるのも素敵なことかもしれません。弱さを見せることが、関係をさらに深くしてくれるでしょう。',2:'人の気持ちに敏感なあなた。すべての期待に応える必要はありません。「今は難しい」と伝えることも優しさの一つの形ではないでしょうか。',3:'社交的で多くの人と楽しく過ごせるあなた。本当の自分を見せられる深い関係も大切にしてみてください。',4:'信頼できる少数の方と深い関係を築くタイプかもしれません。時には気軽に新しい人と接してみると、意外な発見があるかもしれませんよ。',5:'適度な距離感のある関係が心地よいかもしれません。自然体の付き合いを心がけてみてください。',6:'面倒見の良さは素晴らしい魅力です。相手の力を信じて見守ることも、大切な関わり方の一つかもしれません。',7:'深い対話を好むあなた。信頼できる人にはあなたの考えを積極的に共有してみてください。きっと喜ばれるはずです。',8:'相手に任せる場面を増やすことで、より信頼し合える関係が育まれるかもしれません。',9:'本音を少しずつ見せていくことで、より深い信頼関係が生まれるかもしれません。ありのままの自分が一番の魅力です。',11:'繊細な感受性をお持ちのあなた。一人の時間で心をリセットすることを大切にしてください。',22:'あなたの内面を理解してくれる方を大切にしてください。対等な関係があなたにとって最も心地よいでしょう。',33:'深い愛情を持つあなたですが、ご自身も大切にしてください。相互に満たし合える関係こそがあなたにふさわしいです。'},
+    wellness:{1:'走り続けるだけでなく「立ち止まる時間」も大切にしてみてください。オン・オフの切り替えを意識することで、より充実した毎日を過ごせるかもしれません。',2:'繊細な感性を持つあなたは、周囲の影響を受けやすいかもしれません。心を落ち着ける時間を意識的に作ることが、日々の充実感につながるでしょう。',3:'楽しいことに夢中になるあまり、生活リズムが乱れがちかもしれません。「楽しみながら整える」がキーワードです。',4:'日々の習慣づくりが得意なタイプかもしれません。ただ完璧を求めすぎないことが長続きのコツです。',5:'体を動かすことでエネルギーが湧いてくるタイプかもしれません。日々のリズムを大切にすることが充実への近道になるでしょう。',6:'大切な人のことを優先して、ご自身を後回しにしていませんか？ あなたが元気でいることが周囲にとっても一番の安心材料です。',7:'時々頭を空っぽにする時間も大切かもしれません。自然の中で過ごす時間が、心身のリフレッシュに効果的なようです。',8:'仕事と生活のメリハリを意識してみてください。「良い人生のために頑張っている」という原点を時々思い出してみてください。',9:'世の中のさまざまな情報から影響を受けやすいかもしれません。美しい音楽や自然に触れる時間が、心身のバランスを整えてくれるでしょう。',11:'定期的に「デジタルから離れる時間」を取り入れることで、本来のエネルギーを取り戻しやすくなるかもしれません。',22:'マラソンのようにペース配分を意識することが大切かもしれません。日々の小さな充実を積み重ねていきましょう。',33:'周囲の感情に影響を受けやすいと感じることはありませんか？ 自分と他者の気持ちの境界線を優しく意識することが大切です。'}
+  };
+  return (d[cat] && d[cat][lp]) || '';
+}
+
+// ============================
+// GENERATE RESULT
+// ============================
+function generateResult() {
+  const lp = calcLifePath(birthday.year, birthday.month, birthday.day);
+  const bd = calcBirthday(birthday.day);
+  const py = calcPersonalYear(birthday.month, birthday.day, 2026);
+  const lpD = lifePathData[lp], bdD = birthdayData[bd], pyD = personalYearData[py];
+  const cat = answers[0], a2 = answers[1], a3 = answers[2], a4 = answers[3], a5 = answers[4];
+  const catTitle = {love:'恋愛・パートナーシップ',career:'仕事・キャリア',money:'お金・財運',relationship:'人間関係・家族',wellness:'心と体のバランス'};
+  const dateStr = `${birthday.year}年${birthday.month}月${birthday.day}日`;
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}.${today.getMonth()+1}.${today.getDate()}`;
+  const masterLabel = (lp===11||lp===22||lp===33) ? '<span style="font-size:10px;display:block;margin-top:4px;color:var(--primary-light);">MASTER</span>' : '';
+
+  document.getElementById('result-container').innerHTML = `
+    <div class="result-cover"><div class="result-cover-inner">
+      <div class="result-cover-icon">&#10024;</div>
+      <h1 class="result-cover-title">数秘術鑑定書</h1>
+      <p class="result-cover-date">鑑定日：${todayStr}</p>
+      <p class="result-cover-birthday">${dateStr} 生まれ</p>
+    </div></div>
+
+    <div class="number-cards">
+      <div class="number-card"><p class="number-card-label">LIFE PATH</p><p class="number-card-value">${lp}${masterLabel}</p><p class="number-card-name">${lpD.name}</p></div>
+      <div class="number-card"><p class="number-card-label">BIRTHDAY</p><p class="number-card-value">${bd}</p><p class="number-card-name">${bdD.name}</p></div>
+      <div class="number-card"><p class="number-card-label">YEAR 2026</p><p class="number-card-value">${py}</p><p class="number-card-name">${pyD.theme.split('の')[0]}</p></div>
+    </div>
+
+    <div class="result-section"><p class="section-number">CHAPTER 01</p><h2 class="section-title">はじめに</h2><div class="section-body">
+      <p>この度は、数秘術鑑定をお受けいただきありがとうございます。</p>
+      <p>数秘術は、古代ギリシャの数学者ピタゴラスが体系化したとされる、数千年の歴史を持つ占術です。あなたが生まれた日に刻まれた数字から、性格の傾向や才能の可能性を読み解いていきます。</p>
+      <p>ここに記された内容は、あなたの可能性を広げるためのヒントです。「当てはまるかも」と感じた部分を、ぜひ日々の生活に取り入れてみてください。</p>
+    </div></div>
+
+    <div class="result-section"><p class="section-number">CHAPTER 02</p>
+      <h2 class="section-title">ライフパスナンバー ${lp}「${lpD.name}」<br><small style="font-size:12px;color:var(--text-muted);font-weight:300;">─ ${lpD.keyword} ─</small></h2>
+      <div class="section-body">${lpD.trait.split('\n\n').map(p=>`<p>${p}</p>`).join('')}</div>
+    </div>
+
+    <div class="result-section"><p class="section-number">CHAPTER 03</p>
+      <h2 class="section-title">バースデーナンバー ${bd}「${bdD.name}」<br><small style="font-size:12px;color:var(--text-muted);font-weight:300;">─ 生まれ持った才能 ─</small></h2>
+      <div class="section-body">
+        <p>${bdD.desc}</p>
+        <p>ライフパスナンバー${lp}の「${lpD.name}」としての資質に、バースデーナンバー${bd}の「${bdD.name}」が加わることで、あなたの個性はさらにユニークなものになっているようです。この2つの数字が交わるところに、あなただけの輝きがあるかもしれません。</p>
+      </div>
+    </div>
+
+    <div class="result-section"><p class="section-number">CHAPTER 04</p>
+      <h2 class="section-title">${catTitle[cat]}について<br><small style="font-size:12px;color:var(--text-muted);font-weight:300;">─ 数字が示すメッセージ ─</small></h2>
+      <div class="section-body">
+        <p>${getConcernAdvice(lp, cat)}</p>
+        <p>${q2Content[a2]||''}</p>
+        <div class="highlight-box">${q3Content[a3]||''}</div>
+      </div>
+    </div>
+
+    <div class="result-section"><p class="section-number">CHAPTER 05</p>
+      <h2 class="section-title">2026年の運勢 ─ パーソナルイヤー ${py}<br><small style="font-size:12px;color:var(--text-muted);font-weight:300;">「${pyD.theme}」</small></h2>
+      <div class="section-body">${pyD.desc.split('\n\n').map(p=>`<p>${p}</p>`).join('')}</div>
+    </div>
+
+    <div class="result-ending"><h2 class="result-ending-title">おわりに</h2><div class="result-ending-text">
+      <p>${q4Content[a4]||''}</p>
+      <p style="margin-top:16px;">${q5Content[a5]||''}</p>
+      <p style="margin-top:16px;">数秘術は「こうなる」という予言ではなく、「あなたにはこんな可能性があるかもしれません」というヒントを示すものです。最終的に人生を彩るのは、あなた自身の選択と行動です。</p>
+      <p style="margin-top:16px;">この鑑定が、あなたの毎日をほんの少しでも前向きにするきっかけになれば、心から嬉しく思います。あなたの未来に、たくさんの光が降り注ぎますように。</p>
+    </div><p class="result-ending-icon">&#10024;</p></div>
+
+    <div class="disclaimer"><p>※本鑑定はエンターテインメントを目的としたものであり、医療・法律・金融等の専門的なアドバイスに代わるものではありません。健康や法律、資産に関するご相談は、それぞれの専門家にご相談ください。</p></div>
+    <div class="result-footer"><p>Numerology Reading</p><p style="margin-top:6px;">powered by 数秘術鑑定</p></div>
+    <button class="btn-retry" onclick="retry()">もう一度鑑定する</button>`;
+}
+
+function retry() { answers=[]; currentQ=0; selectedCategory=''; goTo('screen-welcome'); }
+</script>
+</body>
+</html>
